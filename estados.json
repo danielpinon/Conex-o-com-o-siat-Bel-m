@@ -1,0 +1,117 @@
+{
+  "option": [
+    {
+      "@value": "",
+      "#text": "SELECIONE"
+    },
+    {
+      "@value": "1",
+      "#text": "Acre"
+    },
+    {
+      "@value": "2",
+      "#text": "Alagoas"
+    },
+    {
+      "@value": "4",
+      "#text": "Amapá"
+    },
+    {
+      "@value": "3",
+      "#text": "Amazonas"
+    },
+    {
+      "@value": "5",
+      "#text": "Bahia"
+    },
+    {
+      "@value": "6",
+      "#text": "Ceará"
+    },
+    {
+      "@value": "7",
+      "#text": "Distrito Federal"
+    },
+    {
+      "@value": "8",
+      "#text": "Espírito Santo"
+    },
+    {
+      "@value": "9",
+      "#text": "Goiás"
+    },
+    {
+      "@value": "10",
+      "#text": "Maranhão"
+    },
+    {
+      "@value": "13",
+      "#text": "Mato Grosso"
+    },
+    {
+      "@value": "12",
+      "#text": "Mato Grosso do Sul"
+    },
+    {
+      "@value": "11",
+      "#text": "Minas Gerais"
+    },
+    {
+      "@value": "14",
+      "@selected": "",
+      "#text": "Pará"
+    },
+    {
+      "@value": "15",
+      "#text": "Paraíba"
+    },
+    {
+      "@value": "18",
+      "#text": "Paraná"
+    },
+    {
+      "@value": "16",
+      "#text": "Pernambuco"
+    },
+    {
+      "@value": "17",
+      "#text": "Piauí"
+    },
+    {
+      "@value": "19",
+      "#text": "Rio de Janeiro"
+    },
+    {
+      "@value": "20",
+      "#text": "Rio Grande do Norte"
+    },
+    {
+      "@value": "23",
+      "#text": "Rio Grande do Sul"
+    },
+    {
+      "@value": "21",
+      "#text": "Rondônia"
+    },
+    {
+      "@value": "22",
+      "#text": "Roraima"
+    },
+    {
+      "@value": "24",
+      "#text": "Santa Catarina"
+    },
+    {
+      "@value": "26",
+      "#text": "São Paulo"
+    },
+    {
+      "@value": "25",
+      "#text": "Sergipe"
+    },
+    {
+      "@value": "27",
+      "#text": "Tocantins"
+    }
+  ]
+}
