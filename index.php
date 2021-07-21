@@ -74,6 +74,7 @@ try{
             $datafinal = date('d/m/Y');
         }
         $notas = obterNotasFiscaisLancadas($dataInicial, $datafinal, $session->getCookie('JSESSIONID'), $newArray);
+        header('Content-Type: application/json');
         echo json_encode($notas);
         exit;
     }else if(isset($_GET['newnota'])){
