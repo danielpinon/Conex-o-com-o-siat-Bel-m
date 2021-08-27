@@ -221,53 +221,11 @@ try{
         echo json_encode(["success"=>true,"msg"=>$limpa]);
         exit;
     }
-    
-    echo $page->getContent();
+    header('Content-Type: application/json');
+    echo json_encode(["err"=>true,"msg"=>"Nada por aqui!"]);
     exit;
-    dd($page->getContent());
-    $paginaAtual = $session->getCurrentUrl();
-    // Aguarda 5 segundos
-    dd($paginaAtual, $session->getResponseHeaders());
-    dd($cpf);
-    dd($page);
-    /*
-        Login in page
-    */
-    $form = $page->find('css','.container > form');
-    $input = $page->findField('nome');
-    $input->setValue($nome);
-    $input = $page->findField('mae');
-    $input->setValue($mae);
-    if(isset($_GET['pai'])){
-        $pai = $_GET['pai'];
-        $input = $page->findField('pai');
-        $input->setValue($pai);
-    }
-    $input = $page->findField('estado');
-    $input->setValue($estado);
-    $input = $page->findField('cidade');
-    $input->setValue($cidade);
-    $input = $page->findField('rg');
-    $input->setValue($rg);
-    $input = $page->findField('estado_emissor');
-    $input->setValue($estado_emissor);
-    $input = $page->findField('cpf');
-    $input->setValue($cpf);
-    $input = $page->findField('dt_nascimento');
-    $input->setValue($dt_nascimento);
-    $form->submit();
-    $form = $page->find('css','.container > form');
-    $form->submit();
-    // retrieving response headers:
-    $jsonHead = $session->getResponseHeaders();
-    //print_r(json_encode($jsonHead));
-    header('Content-Disposition: inline; filename="antecedente.pdf"');
-    header('Content-Type: application/pdf');
-    echo $page->getContent();
-    
 } catch (Exception $e) {
-    dd($e);
-    echo '{"status":"Error","line":126}';
+    echo '{"status":"Error"';
 }
 
 /**
