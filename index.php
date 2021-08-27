@@ -16,6 +16,13 @@ use Behat\Mink\Mink,
     Behat\Mink\Driver\Goutte\Client as GoutteClient;
     
 try{
+    $headers = getRequestHeaders();
+    if($headers["Authentication"] != "7y9IR0JtI@IV3JcJ@Nf6wY5AqybRa#mU9TlhhdMy7lO#f2wwpRYOqcBM*$09e6tJgEyDuATG#8"){
+        header('Content-Type: application/json');
+        echo json_encode(["err"=>true,"msg"=>"Autenticação Falhou!"]);
+        exit;
+    }
+    
     /*
         Set initial url
     */
@@ -47,7 +54,7 @@ try{
     $url = $link[3]->getAttribute('href');
     // Abre a nova página
     $session->visit($url);
-    // Notas fiscais lançadas
+    // Opções de operações
     if(isset($_GET['extrato'])){
         // Abre a pagina de consultar notas
         $session->visit("http://siat.nota.belem.pa.gov.br:8180/sistematributario/jsp/consultaNFSe/consultaNFSeFiltro.jsf");
@@ -1207,4 +1214,14 @@ function obterNotasFiscaisLancadas($dataInit,$dataFinal,$cookie,$body)
         return $d && $d->format($format) == $date;
     }
 
-    
+    function getRequestHeaders() {
+        $headers = array();
+        foreach($_SERVER as $key => $value) {
+            if (substr($key, 0, 5) <> 'HTTP_') {
+                continue;
+            }
+            $header = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower(substr($key, 5)))));
+            $headers[$header] = $value;
+        }
+        return $headers;
+    }
