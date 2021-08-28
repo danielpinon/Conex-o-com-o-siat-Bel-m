@@ -95,7 +95,7 @@ try{
             $datafinal = date('d/m/Y');
         }
         // Retorna o extrato
-        $notas = obterNotasFiscaisLancadas($dataInicial, $datafinal, $session->getCookie('JSESSIONID'), $newArray);
+        $notas = obterNotasFiscaisLancadas($dataInicial, $datafinal,null, $session->getCookie('JSESSIONID'), $newArray);
         header('Content-Type: application/json');
         echo json_encode($notas);
         exit;
@@ -227,6 +227,48 @@ try{
         header('Content-Type: application/json');
         echo json_encode(["success"=>true,"msg"=>$limpa]);
         exit;
+    }else if(isset($_GET['documentopdf'])){
+        if(isset($_POST['NOTA_NUMERO'])){
+            $notaNumero = $_POST['NOTA_NUMERO'];
+        }else{
+            header('Content-Type: application/json');
+            echo json_encode(["err"=>true,"msg"=>"Sem Número da Nota"]);
+            exit;
+        }
+        // Abre a pagina de consultar notas
+        $session->visit("http://siat.nota.belem.pa.gov.br:8180/sistematributario/jsp/consultaNFSe/consultaNFSeFiltro.jsf");
+        $page = $session->getPage();
+        $array = $page->findAll('css','form')[2]->findAll('css','input');
+        $newArray = [];
+        foreach ($array as $row) {
+            $newArray[$row->getAttribute('name')] = $row->getAttribute('value');
+        }
+        // Retorna o extrato
+        $notas = obterNotasFiscaisLancadas(null, null, $notaNumero, $session->getCookie('JSESSIONID'), $newArray);
+        if(count($notas) == 0){
+            header('Content-Type: application/json');
+            echo json_encode(["err"=>true,"msg"=>"Nota não é Válida"]);
+            exit;
+        }
+        // Obtem informções da nota
+        $nota = $notas[0];
+        $session->visit("http://siat.nota.belem.pa.gov.br:8180/sistematributario/baixarPdfDeNota?idNota=".$nota['id']."&codMunicipio=961");
+        $page = $session->getPage();
+        $codigo = $page->getContent();
+        if(isset($_POST['BASE_64']) && $_POST['BASE_64'] == "true"){
+            $b64Doc = base64_encode($codigo);
+            header('Content-Type: application/json');
+            echo json_encode(["success"=>true,"base64"=>$b64Doc]);
+            exit;
+        }else if(isset($_POST['BASE_64']) && $_POST['BASE_64'] == "false"){
+            header("Content-type: application/pdf");
+            echo $codigo;
+            exit;
+        }else{
+            header('Content-Type: application/json');
+            echo json_encode(["err"=>true,"msg"=>"Falta o campo BASE_64 verdadeiro ou falso"]);
+            exit;
+        }
     }
     header('Content-Type: application/json');
     echo json_encode(["err"=>true,"msg"=>"Nada por aqui!"]);
@@ -288,11 +330,16 @@ function autorize($cookie)
 /**
  * Função para obter informações de nota fiscal
  */
-function obterNotasFiscaisLancadas($dataInit,$dataFinal,$cookie,$body)
+function obterNotasFiscaisLancadas($dataInit=null,$dataFinal=null,$numeroNota = null,$cookie = null,$body = null)
 {
     // Datas de filtro
-    $body["j_id123:j_id164"] = $dataInit;
-    $body["j_id123:j_id168"] = $dataFinal;
+    if($numeroNota != null){
+        $body["j_id123:numeroNota"] = $numeroNota;
+    }
+    if($dataInit != null || $dataFinal != null){
+        $body["j_id123:j_id164"] = $dataInit;
+        $body["j_id123:j_id168"] = $dataFinal;
+    }
     $body["j_id123:tipoNota"] = "1";
     $body["j_id123:tipoRecolhimento"] = null;
     $body["j_id123:cboTipoNota"] = null;
@@ -333,39 +380,47 @@ function obterNotasFiscaisLancadas($dataInit,$dataFinal,$cookie,$body)
     if ($err) {
     echo "cURL Error #:" . $err;
     } else {
+        if(!isset(explode('<div class="row">',$response)[9])){
+            // Lista vazia!
+            return [];
+        }
         $response = explode('<div class="row">',$response)[9];
         $response = explode('<tr',$response);
         $notas = [];
+        $index = 0;
         foreach ($response as $key => $value) {
             if($key > 1){
                 $colunas = explode('<td',$value);
-                $notas[$key] = [];
+                $notas[$index] = [];
                 foreach ($colunas as $key1 => $coluna) {
                     if($key1 == 1){
+                        $idNota = explode("'",explode("'idNota':'",$coluna)[1])[0];
                         $numeroNota = str_replace('</a></td>','',explode('</span>',$coluna)[3]);
-                        $notas[$key]['numero'] = $numeroNota;
+                        $notas[$index]['id'] = $idNota;
+                        $notas[$index]['numero'] = $numeroNota;
                     }else if($key1 == 2){
-                        $notas[$key]['tipo'] = limpaDado($coluna);
+                        $notas[$index]['tipo'] = limpaDado($coluna);
                     }else if($key1 == 3){
-                        $notas[$key]['Emissão'] = limpaDado($coluna);
+                        $notas[$index]['Emissão'] = limpaDado($coluna);
                     }else if($key1 == 4){
-                        $notas[$key]['Tomador'] = limpaDado($coluna);
+                        $notas[$index]['Tomador'] = limpaDado($coluna);
                     }else if($key1 == 5){
-                        $notas[$key]['valorservico'] = limpaDado($coluna);
+                        $notas[$index]['valorservico'] = limpaDado($coluna);
                     }else if($key1 == 6){
-                        $notas[$key]['valornota'] = limpaDado($coluna);
+                        $notas[$index]['valornota'] = limpaDado($coluna);
                     }else if($key1 == 7){
-                        $notas[$key]['issretido'] = limpaDado($coluna);
+                        $notas[$index]['issretido'] = limpaDado($coluna);
                     }else if($key1 == 8){
-                        $notas[$key]['tipotributacao'] = limpaDado($coluna);
+                        $notas[$index]['tipotributacao'] = limpaDado($coluna);
                     }else if($key1 == 9){
-                        $notas[$key]['valoriss'] = limpaDado($coluna);
+                        $notas[$index]['valoriss'] = limpaDado($coluna);
                     }else if($key1 == 10){
-                        $notas[$key]['aliquota'] = limpaDado($coluna);
+                        $notas[$index]['aliquota'] = limpaDado($coluna);
                     }else if($key1 == 11){
-                        $notas[$key]['situacao'] = limpaDado($coluna);
+                        $notas[$index]['situacao'] = limpaDado($coluna);
                     }
                 }
+                $index++;
             }
         }
         return $notas;
